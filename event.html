@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Event Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background: linear-gradient(135deg, #e0f2fe 0%, #b3d9ff 50%, #e0f2fe 100%); 
+            min-height: 100vh; 
+            padding: 2rem; 
+        }
+        
+        .dashboard { 
+            max-width: 1200px; 
+            margin: 0 auto; 
+            display: grid; 
+            grid-template-columns: 1fr 1fr; 
+            gap: 2rem; 
+            height: calc(100vh - 4rem); 
+        }
+        
+        .partition { 
+            background: rgba(255, 255, 255, 0.9); 
+            border-radius: 20px; 
+            padding: 2rem; 
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1); 
+            backdrop-filter: blur(10px); 
+            overflow-y: auto; 
+        }
+        
+        .partition h2 { 
+            color: #0369a1; 
+            margin-bottom: 1.5rem; 
+            font-size: 1.8rem; 
+            font-weight: 700; 
+            text-align: center; 
+        }
+        
+        /* Add New Event Partition */
+        .form-group { 
+            margin-bottom: 1.5rem; 
+        }
+        .form-group label { 
+            display: block; 
+            margin-bottom: 0.5rem; 
+            color: #0c4a6e; 
+            font-weight: 600; 
+        }
+        .form-group input, .form-group select, .form-group textarea { 
+            width: 100%; 
+            padding: 1rem; 
+            border: 2px solid #bae6fd; 
+            border-radius: 12px; 
+            font-size: 1rem; 
+            transition: all 0.3s; 
+            background: #f0f9ff; 
+        }
+        .form-group input:focus, .form-group select:focus, .form-group textarea:focus { 
+            outline: none; 
+            border-color: #0ea5e9; 
+            background: white; 
+            box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.1); 
+        }
+        .form-group textarea { 
+            resize: vertical; 
+            min-height: 100px; 
+        }
+        .btn-add { 
+            width: 100%; 
+            padding: 1rem; 
+            background: linear-gradient(135deg, #0ea5e9, #0284c7); 
+            color: white; 
+            border: none; 
+            border-radius: 12px; 
+            font-size: 1.1rem; 
+            font-weight: 600; 
+            cursor: pointer; 
+            transition: all 0.3s; 
+        }
+        .btn-add:hover { 
+            transform: translateY(-2px); 
+            box-shadow: 0 10px 20px rgba(14, 165, 233, 0.3); 
+        }
+        
+        /* My Events Partition */
+        .events-controls { 
+            display: grid; 
+            grid-template-columns: 1fr 1fr; 
+            gap: 1rem; 
+            margin-bottom: 1.5rem; 
+        }
+        .btn-rect { 
+            padding: 1rem; 
+            border: none; 
+            border-radius: 12px; 
+            font-size: 1rem; 
+            font-weight: 600; 
+            cursor: pointer; 
+            transition: all 0.3s; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            gap: 0.5rem; 
+        }
+        .btn-clear { 
+            background: linear-gradient(135deg, #ef4444, #dc2626); 
+            color: white; 
+        }
+        .btn-clear:hover { 
+            transform: translateY(-2px); 
+            box-shadow: 0 10px 20px rgba(239, 68, 68, 0.3); 
+        }
+        .btn-bulk-add { 
+            background: linear-gradient(135deg, #10b981, #059669); 
+            color: white; 
+        }
+        .btn-bulk-add:hover { 
+            transform: translateY(-2px); 
+            box-shadow: 0 10px 20px rgba(16, 185, 129, 0.3); 
+        }
+        
+        .events-list { 
+            max-height: 400px; 
+            overflow-y: auto; 
+        }
+        .event-item { 
+            background: rgba(255, 255, 255, 0.7); 
+            border: 2px solid #bae6fd; 
+            border-radius: 12px; 
+            padding: 1.5rem; 
+            margin-bottom: 1rem; 
+            transition: all 0.3s; 
+        }
+        .event-item:hover { 
+            border-color: #0ea5e9; 
+            transform: translateY(-2px); 
+            box-shadow: 0 10px 20px rgba(14, 165, 233, 0.15); 
+        }
+        .event-title { 
+            font-size: 1.3rem; 
+            font-weight: 600; 
+            color: #0369a1; 
+            margin-bottom: 0.5rem; 
+        }
+        .event-meta { 
+            display: flex; 
+            gap: 1rem; 
+            margin-bottom: 0.5rem; 
+            font-size: 0.95rem; 
+            color: #0c4a6e; 
+        }
+        .event-desc { 
+            color: #475569; 
+            line-height: 1.5; 
+        }
+        .no-events { 
+            text-align: center; 
+            color: #6b7280; 
+            font-style: italic; 
+            padding: 2rem; 
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .dashboard { 
+                grid-template-columns: 1fr; 
+                gap: 1rem; 
+                height: auto; 
+            }
+            body { padding: 1rem; }
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard">
+        <!-- Add New Event Partition -->
+        <div class="partition">
+            <h2>➕ Add New Event</h2>
+            <form id="eventForm">
+                <div class="form-group">
+                    <label>Event Title</label>
+                    <input type="text" id="eventTitle" required placeholder="e.g., Team Meeting">
+                </div>
+                <div class="form-group">
+                    <label>Event Date</label>
+                    <input type="date" id="eventDate" required>
+                </div>
+                <div class="form-group">
+                    <label>Category</label>
+                    <select id="eventCategory" required>
+                        <option value="">Select Category</option>
+                        <option value="Work">Work</option>
+                        <option value="Personal">Personal</option>
+                        <option value="Meeting">Meeting</option>
+                        <option value="Social">Social</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Description</label>
+                    <textarea id="eventDesc" required placeholder="Event details..."></textarea>
+                </div>
+                <button type="submit" class="btn-add">
+                    <span class="material-icons">add</span>
+                    Add Event
+                </button>
+            </form>
+        </div>
+        
+        <!-- My Events Partition -->
+        <div class="partition">
+            <h2>📋 My Events</h2>
+            <div class="events-controls">
+                <button class="btn-rect btn-clear" onclick="clearAllEvents()">
+                    <span class="material-icons">clear_all</span>
+                    Clear All Events
+                </button>
+                <button class="btn-rect btn-bulk-add" onclick="bulkAddEvents()">
+                    <span class="material-icons">add</span>
+                    Add Sample Events
+                </button>
+            </div>
+            <div class="events-list" id="eventsList">
+                <!-- Events rendered by JS -->
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        let events = JSON.parse(localStorage.getItem('events')) || [];
+        renderEvents();
+        
+        document.getElementById('eventForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const title = document.getElementById('eventTitle').value;
+            const date = document.getElementById('eventDate').value;
+            const category = document.getElementById('eventCategory').value;
+            const desc = document.getElementById('eventDesc').value;
+            
+            const newEvent = {
+                id: Date.now(),
+                title,
+                date,
+                category,
+                desc,
+                createdAt: new Date().toLocaleDateString()
+            };
+            
+            events.unshift(newEvent);
+            localStorage.setItem('events', JSON.stringify(events));
+            renderEvents();
+            this.reset();
+            alert('Event added successfully!');
+        });
+        
+        function renderEvents() {
+            const list = document.getElementById('eventsList');
+            if (events.length === 0) {
+                list.innerHTML = '<div class="no-events">No events yet. Add some!</div>';
+                return;
+            }
+            
+            list.innerHTML = events.map(event => `
+                <div class="event-item">
+                    <div class="event-title">${event.title}</div>
+                    <div class="event-meta">
+                        <span>📅 ${event.date}</span>
+                        <span>🏷️ ${event.category}</span>
+                        <span>Added: ${event.createdAt}</span>
+                    </div>
+                    <div class="event-desc">${event.desc}</div>
+                </div>
+            `).join('');
+        }
+        
+        function clearAllEvents() {
+            if (confirm('Clear all events? This cannot be undone.')) {
+                events = [];
+                localStorage.removeItem('events');
+                renderEvents();
+            }
+        }
+        
+        function bulkAddEvents() {
+            const samples = [
+                { title: 'Sample Meeting', date: '2026-02-10', category: 'Meeting', desc: 'Team sync discussion' },
+                { title: 'Personal Task', date: '2026-02-12', category: 'Personal', desc: 'Complete project milestone' }
+            ];
+            events.unshift(...samples.map(s => ({...s, id: Date.now() + Math.random(), createdAt: new Date().toLocaleDateString()})));
+            localStorage.setItem('events', JSON.stringify(events));
+            renderEvents();
+            alert('Sample events added!');
+        }
+    </script>
+</body>
+</html>
